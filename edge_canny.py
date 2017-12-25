@@ -43,6 +43,15 @@ def whereToGo(code_to_go, y, x, map_to_go):
 
 img = cv2.imread('apple.jpg', cv2.IMREAD_UNCHANGED)
 edges = cv2.Canny(img, 100, 200, apertureSize=3, L2gradient=True)
+edges = cv2.bitwise_not(edges)
+
+#MORPHOLOGIC CLEANING
+kernel1 = cv2.getStructuringElement(cv2.MORPH_CROSS, (1,1))
+kernel5 = cv2.getStructuringElement(cv2.MORPH_CROSS, (5,5))
+edges_eroded = cv2.morphologyEx(edges, cv2.MORPH_ERODE, kernel5)
+edges_eroded = cv2.morphologyEx(edges_eroded, cv2.MORPH_DILATE, kernel1)
+
+edges = cv2.bitwise_not(edges_eroded)
 
 # edges = 255*np.asarray([[0,1,1,0],
 #                         [1,0,0,1],
@@ -92,10 +101,10 @@ for i in range(h-1):
 
                 #write to video
                 video_img[y, x] = max(0, video_img[y, x] - 80)
-                if counter % 100 == 0:
+                if counter % 1000 == 0:
                     video_to_show = cv2.resize(video_img, (w, h))
-                    if counter % 1000 == 0:
-                        cv2.imwrite("video_img_" + str(counter/100) + ".png", video_to_show)
+                    #if counter % 1000 == 0:
+                        #cv2.imwrite("video_img_" + str(counter/100) + ".png", video_to_show)
                     imRGB = cv2.cvtColor(video_to_show, cv2.COLOR_GRAY2RGB)
                     video.write(imRGB)
                 counter += 1
