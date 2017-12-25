@@ -50,7 +50,6 @@ kernel5 = cv2.getStructuringElement(cv2.MORPH_CROSS, (5,5))
 edges_eroded = cv2.morphologyEx(edges, cv2.MORPH_DILATE, kernel5)
 edges = cv2.morphologyEx(edges_eroded, cv2.MORPH_ERODE, kernel1)
 
-
 # edges = 255*np.asarray([[0,1,1,0],
 #                         [1,0,0,1],
 #                         [1,0,0,1],
@@ -58,14 +57,14 @@ edges = cv2.morphologyEx(edges_eroded, cv2.MORPH_ERODE, kernel1)
 #                         [0,1,0,1]],dtype=np.uint8)
 edges_bool = edges.astype(np.bool)
 
-w, h = edges_bool.shape
+h, w = edges_bool.shape
 resizer_coefficient = min(MAX_HEIGHT/h, MAX_WIDTH/w)
 h_resized = int(h * resizer_coefficient)
 w_resized = int(w * resizer_coefficient)
 fourcc = cv2.VideoWriter_fourcc(*'X264')
 video = cv2.VideoWriter(OUTPUT_FILE_NAME + ".avi",fourcc,10.0,(w, h))
 
-raw_edges = np.zeros((w+2, h+2), dtype=np.uint8)
+raw_edges = np.zeros((h+2, w+2), dtype=np.uint8)
 raw_edges[1:-1, 1:-1] = edges_bool
 
 recoded_edges = edges_bool * (raw_edges[0:-2, 0:-2] +
@@ -78,12 +77,12 @@ recoded_edges = edges_bool * (raw_edges[0:-2, 0:-2] +
                               128 * raw_edges[2:, 2:])
 
 recoded_buff = np.copy(recoded_edges)
-output_image = np.ones((w,h), dtype=np.bool)
+output_image = np.ones((h,w), dtype=np.bool)
 
-video_img = 255 * np.ones((w,h), dtype=np.uint8)
+video_img = 255 * np.ones((h,w), dtype=np.uint8)
 counter = 0
-for i in range(h-1):
-    for j in range(w-1):
+for i in range(h):
+    for j in range(w):
         if recoded_buff[i,j] > 0:
             #print output_image
             #print recoded_buff
@@ -100,10 +99,10 @@ for i in range(h-1):
                 #write to video
                 video_img[y, x] = max(0, video_img[y, x] - 80)
                 if counter % 1000 == 0:
-                    video_to_show = cv2.resize(video_img, (w, h))
+                    #video_to_show = cv2.resize(video_img, (w, h))
                     #if counter % 1000 == 0:
                         #cv2.imwrite("video_img_" + str(counter/100) + ".png", video_to_show)
-                    imRGB = cv2.cvtColor(video_to_show, cv2.COLOR_GRAY2RGB)
+                    imRGB = cv2.cvtColor(video_img, cv2.COLOR_GRAY2RGB)
                     video.write(imRGB)
                 counter += 1
 
