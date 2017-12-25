@@ -43,15 +43,13 @@ def whereToGo(code_to_go, y, x, map_to_go):
 
 img = cv2.imread('apple.jpg', cv2.IMREAD_UNCHANGED)
 edges = cv2.Canny(img, 100, 200, apertureSize=3, L2gradient=True)
-edges = cv2.bitwise_not(edges)
 
 #MORPHOLOGIC CLEANING
 kernel1 = cv2.getStructuringElement(cv2.MORPH_CROSS, (1,1))
 kernel5 = cv2.getStructuringElement(cv2.MORPH_CROSS, (5,5))
-edges_eroded = cv2.morphologyEx(edges, cv2.MORPH_ERODE, kernel5)
-edges_eroded = cv2.morphologyEx(edges_eroded, cv2.MORPH_DILATE, kernel1)
+edges_eroded = cv2.morphologyEx(edges, cv2.MORPH_DILATE, kernel5)
+edges = cv2.morphologyEx(edges_eroded, cv2.MORPH_ERODE, kernel1)
 
-edges = cv2.bitwise_not(edges_eroded)
 
 # edges = 255*np.asarray([[0,1,1,0],
 #                         [1,0,0,1],
