@@ -14,11 +14,9 @@ from matplotlib import pyplot as plt
 # | 32  | 64  | 128 |
 # |_____|_____|_____|
 
+# python sketchy_lines.py inputFile outputFile threshold1 threshold2 lineWidth opacity lengthOftheVideo
 
-
-OUTPUT_FILE_NAME = "video_sketch4"
-MAX_WIDTH = 640.0
-MAX_HEIGHT = 480.0
+OUTPUT_FILE_NAME = "video_sketch" #TODO: output name
 
 codes = [128, 64, 32, 16, 8, 4, 2, 1]
 map_to_go = { 1 : [-1,-1],
@@ -41,12 +39,12 @@ def codeToGo(node, codes):
 def whereToGo(code_to_go, y, x, map_to_go):
     return y + map_to_go[code_to_go][0], x + map_to_go[code_to_go][1]
 
-img = cv2.imread('cat.jpg', cv2.IMREAD_UNCHANGED)
-edges = cv2.Canny(img, 100, 200, apertureSize=3, L2gradient=True)
+img = cv2.imread('human.jpg', cv2.IMREAD_UNCHANGED)#TODO:
+edges = cv2.Canny(img, 150, 300, apertureSize=3, L2gradient=True) #TODO:
 
 #MORPHOLOGIC CLEANING
 kernel1 = cv2.getStructuringElement(cv2.MORPH_CROSS, (1,1))
-kernel5 = cv2.getStructuringElement(cv2.MORPH_CROSS, (5,5))
+kernel5 = cv2.getStructuringElement(cv2.MORPH_CROSS, (5,5))#TODO: kalinlik
 edges_eroded = cv2.morphologyEx(edges, cv2.MORPH_DILATE, kernel5)
 edges = cv2.morphologyEx(edges_eroded, cv2.MORPH_ERODE, kernel1)
 
@@ -58,11 +56,9 @@ edges = cv2.morphologyEx(edges_eroded, cv2.MORPH_ERODE, kernel1)
 edges_bool = edges.astype(np.bool)
 
 h, w = edges_bool.shape
-resizer_coefficient = min(MAX_HEIGHT/h, MAX_WIDTH/w)
-h_resized = int(h * resizer_coefficient)
-w_resized = int(w * resizer_coefficient)
-fourcc = cv2.VideoWriter_fourcc(*'X264')
-video = cv2.VideoWriter(OUTPUT_FILE_NAME + ".avi",fourcc,10.0,(w, h))
+
+fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+video = cv2.VideoWriter(OUTPUT_FILE_NAME + ".avi",1,10.0,(w, h))
 
 raw_edges = np.zeros((h+2, w+2), dtype=np.uint8)
 raw_edges[1:-1, 1:-1] = edges_bool
@@ -135,8 +131,8 @@ for key in line_dict_keys:
     for points_batch in line_dict[key]:
         for x, y in points_batch:
             #write to video
-            video_img[y, x] = max(0, video_img[y, x] - 40)
-            if counter % int(dot_number/500) == 0:
+            video_img[y, x] = max(0, video_img[y, x] - 40)#TODO: opacitiy
+            if counter % int(dot_number/500) == 0: #TODO:
                 #video_to_show = cv2.resize(video_img, (w, h))
                 #if counter % 1000 == 0:
                     #cv2.imwrite("video_img_" + str(counter/100) + ".png", video_to_show)
@@ -149,8 +145,8 @@ for line_len, points_batch in line_ordered:
     if line_len < line_dict_keys[-1]:
         for x, y in points_batch:
             #write to video
-            video_img[y, x] = max(0, video_img[y, x] - 40)
-            if counter % int(dot_number/500) == 0:
+            video_img[y, x] = max(0, video_img[y, x] - 40) #TODO: opacitiy
+            if counter % int(dot_number/500) == 0: #TODO: length of the video
                 #video_to_show = cv2.resize(video_img, (w, h))
                 #if counter % 1000 == 0:
                     #cv2.imwrite("video_img_" + str(counter/100) + ".png", video_to_show)
