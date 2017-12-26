@@ -1,4 +1,5 @@
 import cv2
+import argparse
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -14,11 +15,27 @@ from matplotlib import pyplot as plt
 # | 32  | 64  | 128 |
 # |_____|_____|_____|
 
+# python sketchy_lines.py inputFile outputFile -t1 threshold1 -t2 threshold2 -lw lineWidth -o opacity -ln videoLength
 
+parser = argparse.ArgumentParser()
+parser.add_argument('input', action="store", help='inputfile')
+parser.add_argument('output', action="store", help='outputfile')
+parser.add_argument('-t1', action='store', dest='threshold1',type=int,help='Threshold for the dots, the bigger the threshold, the less dots displayed', default=300)
+parser.add_argument('-t2', action='store', dest='threshold2',type=int,help='Threshold for the connected dots, the bigger the threshold, the less connected dots displayed', default=150)
+parser.add_argument('-lw', action='store', dest='lineWidth',type=int,help='Width for the displayed lines', default=5)
+parser.add_argument('-o', action='store', dest='opacity',type=int,help='Opacity for the dots', default=40)
+parser.add_argument('-ln', action='store', dest='videoLength',type=int,help='Length of the video, the bigger this value, the longer video', default=500)
 
-OUTPUT_FILE_NAME = "video_sketch4"
-MAX_WIDTH = 640.0
-MAX_HEIGHT = 480.0
+args = parser.parse_args()
+print "input = " , args.input
+print "output = " , args.output
+print "th1 = " , args.threshold1
+print "th2 = " , args.threshold2
+print "lw = " , args.lineWidth
+print "o = " , args.opacity
+print "ln = " , args.videoLength
+
+OUTPUT_FILE_NAME = args.output #TODO: output name
 
 codes = [128, 64, 32, 16, 8, 4, 2, 1]
 map_to_go = { 1 : [-1,-1],
@@ -41,12 +58,12 @@ def codeToGo(node, codes):
 def whereToGo(code_to_go, y, x, map_to_go):
     return y + map_to_go[code_to_go][0], x + map_to_go[code_to_go][1]
 
-img = cv2.imread('cat.jpg', cv2.IMREAD_UNCHANGED)
-edges = cv2.Canny(img, 100, 200, apertureSize=3, L2gradient=True)
+img = cv2.imread(args.input, cv2.IMREAD_UNCHANGED)
+edges = cv2.Canny(img, args.threshold2, args.threshold1, apertureSize=3, L2gradient=True) 
 
 #MORPHOLOGIC CLEANING
 kernel1 = cv2.getStructuringElement(cv2.MORPH_CROSS, (1,1))
-kernel5 = cv2.getStructuringElement(cv2.MORPH_CROSS, (5,5))
+kernel5 = cv2.getStructuringElement(cv2.MORPH_CROSS, (args.lineWidth,args.lineWidth))
 edges_eroded = cv2.morphologyEx(edges, cv2.MORPH_DILATE, kernel5)
 edges = cv2.morphologyEx(edges_eroded, cv2.MORPH_ERODE, kernel1)
 
@@ -58,11 +75,9 @@ edges = cv2.morphologyEx(edges_eroded, cv2.MORPH_ERODE, kernel1)
 edges_bool = edges.astype(np.bool)
 
 h, w = edges_bool.shape
-resizer_coefficient = min(MAX_HEIGHT/h, MAX_WIDTH/w)
-h_resized = int(h * resizer_coefficient)
-w_resized = int(w * resizer_coefficient)
-fourcc = cv2.VideoWriter_fourcc(*'X264')
-video = cv2.VideoWriter(OUTPUT_FILE_NAME + ".avi",fourcc,10.0,(w, h))
+
+fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+video = cv2.VideoWriter(OUTPUT_FILE_NAME + ".avi",1,10.0,(w, h))
 
 raw_edges = np.zeros((h+2, w+2), dtype=np.uint8)
 raw_edges[1:-1, 1:-1] = edges_bool
@@ -135,8 +150,8 @@ for key in line_dict_keys:
     for points_batch in line_dict[key]:
         for x, y in points_batch:
             #write to video
-            video_img[y, x] = max(0, video_img[y, x] - 40)
-            if counter % int(dot_number/500) == 0:
+            video_img[y, x] = max(0, video_img[y, x] - args.opacity)
+            if counter % int(dot_number/args.videoLength) == 0: 
                 #video_to_show = cv2.resize(video_img, (w, h))
                 #if counter % 1000 == 0:
                     #cv2.imwrite("video_img_" + str(counter/100) + ".png", video_to_show)
@@ -149,8 +164,8 @@ for line_len, points_batch in line_ordered:
     if line_len < line_dict_keys[-1]:
         for x, y in points_batch:
             #write to video
-            video_img[y, x] = max(0, video_img[y, x] - 40)
-            if counter % int(dot_number/500) == 0:
+            video_img[y, x] = max(0, video_img[y, x] - args.opacity)
+            if counter % int(dot_number/args.videoLength) == 0:
                 #video_to_show = cv2.resize(video_img, (w, h))
                 #if counter % 1000 == 0:
                     #cv2.imwrite("video_img_" + str(counter/100) + ".png", video_to_show)

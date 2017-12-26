@@ -41,14 +41,14 @@ def codeToGo(node, codes):
 def whereToGo(code_to_go, y, x, map_to_go):
     return y + map_to_go[code_to_go][0], x + map_to_go[code_to_go][1]
 
-img = cv2.imread('apple.jpg', cv2.IMREAD_UNCHANGED)
-edges = cv2.Canny(img, 100, 200, apertureSize=3, L2gradient=True)
+img = cv2.imread('human.jpg', cv2.IMREAD_UNCHANGED)
+edges = cv2.Canny(img, 150, 300, apertureSize=3, L2gradient=True)
 
 #MORPHOLOGIC CLEANING
-kernel1 = cv2.getStructuringElement(cv2.MORPH_CROSS, (1,1))
-kernel5 = cv2.getStructuringElement(cv2.MORPH_CROSS, (5,5))
-edges_eroded = cv2.morphologyEx(edges, cv2.MORPH_DILATE, kernel5)
-edges = cv2.morphologyEx(edges_eroded, cv2.MORPH_ERODE, kernel1)
+# kernel1 = cv2.getStructuringElement(cv2.MORPH_CROSS, (1,1))
+# kernel5 = cv2.getStructuringElement(cv2.MORPH_CROSS, (2,2))
+# edges_eroded = cv2.morphologyEx(edges, cv2.MORPH_DILATE, kernel5)
+# edges = cv2.morphologyEx(edges_eroded, cv2.MORPH_ERODE, kernel1)
 
 # edges = 255*np.asarray([[0,1,1,0],
 #                         [1,0,0,1],
@@ -61,8 +61,8 @@ h, w = edges_bool.shape
 resizer_coefficient = min(MAX_HEIGHT/h, MAX_WIDTH/w)
 h_resized = int(h * resizer_coefficient)
 w_resized = int(w * resizer_coefficient)
-fourcc = cv2.VideoWriter_fourcc(*'X264')
-video = cv2.VideoWriter(OUTPUT_FILE_NAME + ".avi",fourcc,10.0,(w, h))
+fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+video = cv2.VideoWriter(OUTPUT_FILE_NAME + ".avi",1,10.0,(w, h))
 
 raw_edges = np.zeros((h+2, w+2), dtype=np.uint8)
 raw_edges[1:-1, 1:-1] = edges_bool
@@ -98,7 +98,7 @@ for i in range(h):
 
                 #write to video
                 video_img[y, x] = max(0, video_img[y, x] - 80)
-                if counter % 1000 == 0:
+                if counter % 100 == 0:
                     #video_to_show = cv2.resize(video_img, (w, h))
                     #if counter % 1000 == 0:
                         #cv2.imwrite("video_img_" + str(counter/100) + ".png", video_to_show)
