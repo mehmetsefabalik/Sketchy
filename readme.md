@@ -3,6 +3,10 @@
 #### Mehmet Sefa BALIK 
 #### Nesat DERELI
 
+### PRESENTATION
+
+- https://docs.google.com/presentation/d/101WA6ShiFHuLSU_ZpkgzbnxCMRDkSe9OrAbtOw5s_fc/edit?usp=sharing
+
 ## DELIVERABLES
 
 ### Week 1:
